@@ -1,0 +1,47 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Games">
+    <h1>Games</h1>
+    <p>Welcome to the Games page! Here you can find a list of our available games.</p>
+    <ul>
+        <li><a href="/games/roulette.html" target="_blank">Roulette</a></li>
+     
+    </ul>
+</Layout>
+
+<style>
+    h1 {
+        text-align: center;
+        color: #007BFF;
+    }
+
+    p {
+        text-align: center;
+        font-size: 1.2rem;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    ul li {
+        margin: 0.5rem 0;
+    }
+
+    ul li a {
+        text-decoration: none;
+        color: #007BFF;
+        font-weight: bold;
+        transition: color 0.3s;
+    }
+
+    ul li a:hover {
+        color: #0056b3;
+    }
+</style>

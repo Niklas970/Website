@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            text-align: center;
+        }
+        #roulette-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #roulette-wheel {
+            margin: 20px;
+            width: 500px;
+            height: 500px;
+            background-color: darkgreen;
+            border-radius: 50%;
+            position: relative;
+        }
+        .number {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+        }
+        #ball {
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+        }
+        #controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #balance, #bet-amount, #result {
+            margin: 10px 0;
+        }
+        .chip {
+            margin: 5px;
+            padding: 10px;
+            background-color: #2d2d2d;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .chip:hover {
+            background-color: #555;
+        }
+        #betting-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Roulette Game</h1>
+    <div id="balance">Balance: €1000</div>
+    <div id="bet-amount">Bet Amount: €0</div>
+    <div id="roulette-container">
+        <div id="roulette-wheel"></div>
+        <div id="ball"></div>
+        <div id="betting-controls">
+            <div id="controls">
+                <button onclick="spinWheel()">Spin</button>
+            </div>
+            <div id="chips">
+                <div class="chip" onclick="placeBet(10)">€10</div>
+                <div class="chip" onclick="placeBet(50)">€50</div>
+                <div class="chip" onclick="placeBet(100)">€100</div>
+                <div class="chip" onclick="placeBet(200)">€200</div>
+                <div class="chip" onclick="placeBet(500)">€500</div>
+            </div>
+        </div>
+    </div>
+    <div id="result"></div>
+
+    <script>
+        const numbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+        const colors = ["green", "red", "black"];
+        const wheel = document.getElementById('roulette-wheel');
+        const ball = document.getElementById('ball');
+        const wheelRadius = 250;
+        const ballRadius = 230;
+        let balance = 1000;
+        let betAmount = 0;
+
+        function createWheel() {
+            numbers.forEach((number, index) => {
+                const angle = (index / numbers.length) * 360;
+                const x = wheelRadius + ballRadius * Math.cos(angle * Math.PI / 180) - 25;
+                const y = wheelRadius + ballRadius * Math.sin(angle * Math.PI / 180) - 25;
+                const numberDiv = document.createElement('div');
+                numberDiv.className = 'number';
+                numberDiv.style.left = `${x}px`;
+                numberDiv.style.top = `${y}px`;
+                numberDiv.style.backgroundColor = colors[(index % 2) + 1];
+                numberDiv.innerText = number;
+                wheel.appendChild(numberDiv);
+            });
+        }
+
+        function placeBet(amount) {
+            if (balance >= amount) {
+                betAmount += amount;
+                balance -= amount;
+                document.getElementById('bet-amount').innerText = `Bet Amount: €${betAmount}`;
+                document.getElementById('balance').innerText = `Balance: €${balance}`;
+            } else {
+                alert("Not enough balance to place this bet.");
+            }
+        }
+
+        function spinWheel() {
+            if (betAmount === 0) {
+                alert("Please place a bet first.");
+                return;
+            }
+
+            const spinAngle = Math.floor(Math.random() * 360);
+            const ballAngle = (spinAngle + Math.floor(Math.random() * 360)) % 360;
+            const x = wheelRadius + ballRadius * Math.cos(ballAngle * Math.PI / 180) - 10;
+            const y = wheelRadius + ballRadius * Math.sin(ballAngle * Math.PI / 180) - 10;
+            ball.style.left = `${x}px`;
+            ball.style.top = `${y}px`;
+
+            const winningNumber = numbers[Math.floor(ballAngle / (360 / numbers.length))];
+            const winningColor = winningNumber === 0 ? "green" : (numbers.indexOf(winningNumber) % 2 === 0 ? "black" : "red");
+
+            document.getElementById('result').innerText = `The ball landed on ${winningNumber} (${winningColor})`;
+
+            // Calculate winnings (simplified)
+            if (winningNumber === 0) {
+                balance += betAmount * 35;
+            } else if (winningColor === "red") {
+                balance += betAmount * 2;
+            } else {
+                balance -= betAmount;
+            }
+
+            document.getElementById('balance').innerText = `Balance: €${balance}`;
+            betAmount = 0;
+            document.getElementById('bet-amount').innerText = `Bet Amount: €${betAmount}`;
+        }
+
+        createWheel();
+    </script>
+</body>
+</html>
