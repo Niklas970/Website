@@ -3,42 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roulette</title>
+    <title>Roulette Game</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #1a1a1a;
             color: white;
             text-align: center;
+            position: relative;
+        }
+        #back-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
         }
         #roulette-container {
             display: flex;
             justify-content: center;
             align-items: center;
+            height: 100vh;
         }
-        #roulette-wheel {
-            margin: 20px;
-            width: 500px;
-            height: 500px;
-            background-color: darkgreen;
+        .roulette-wheel {
+            width: 300px;
+            height: 300px;
+            border: 10px solid #333;
             border-radius: 50%;
             position: relative;
+            background: radial-gradient(circle, #fff 0%, #ccc 100%);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
-        .number {
+        .roulette-wheel .number {
             position: absolute;
-            width: 50px;
-            height: 50px;
-            line-height: 50px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            text-align: center;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #fff;
         }
-        #ball {
-            width: 20px;
-            height: 20px;
+        .roulette-wheel .number.red {
+            background-color: red;
+        }
+        .roulette-wheel .number.black {
+            background-color: black;
+        }
+        .roulette-wheel .number.green {
+            background-color: green;
+        }
+        .ball {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
             background-color: white;
-            border-radius: 50%;
             position: absolute;
+            transition: left 0.5s ease-out, top 0.5s ease-out;
         }
         #controls {
             margin-top: 20px;
@@ -51,12 +71,22 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin: 5px;
         }
         button:hover {
             background-color: #0056b3;
         }
         #balance, #bet-amount, #result {
             margin: 10px 0;
+        }
+        #result {
+            position: absolute;
+            top: 80px; /* Adjusted to avoid overlap */
+            width: 100%;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 200; /* Ensure it is above other elements */
         }
         .chip {
             margin: 5px;
@@ -78,12 +108,27 @@
     </style>
 </head>
 <body>
+    <button id="back-button" onclick="goBack()">Back to Games</button>
     <h1>Roulette Game</h1>
     <div id="balance">Balance: €1000</div>
     <div id="bet-amount">Bet Amount: €0</div>
+    <div id="result"></div>
     <div id="roulette-container">
-        <div id="roulette-wheel"></div>
-        <div id="ball"></div>
+        <div class="roulette-wheel">
+            <div class="number red" style="top: 10px; left: 135px;">1</div>
+            <div class="number black" style="top: 35px; left: 200px;">2</div>
+            <div class="number red" style="top: 90px; left: 250px;">3</div>
+            <div class="number black" style="top: 160px; left: 270px;">4</div>
+            <div class="number red" style="top: 230px; left: 250px;">5</div>
+            <div class="number black" style="top: 285px; left: 200px;">6</div>
+            <div class="number red" style="top: 310px; left: 135px;">7</div>
+            <div class="number black" style="top: 285px; left: 70px;">8</div>
+            <div class="number red" style="top: 230px; left: 20px;">9</div>
+            <div class="number black" style="top: 160px; left: 0px;">10</div>
+            <div class="number red" style="top: 90px; left: 20px;">11</div>
+            <div class="number black" style="top: 35px; left: 70px;">12</div>
+            <div class="ball" id="ball"></div>
+        </div>
         <div id="betting-controls">
             <div id="controls">
                 <button onclick="spinWheel()">Spin</button>
@@ -97,28 +142,29 @@
             </div>
         </div>
     </div>
-    <div id="result"></div>
 
     <script>
         const numbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
-        const colors = ["green", "red", "black"];
-        const wheel = document.getElementById('roulette-wheel');
+        const colors = ["green", "black", "red", "black", "red", "black", "red", "black", "red", "black", "red", "black", "red", "black", "red", "black", "red", "black", "red", "red", "black", "red", "black", "red", "black", "red", "black", "red", "black", "red", "black", "red", "black", "red"];
+        const wheel = document.querySelector('.roulette-wheel');
         const ball = document.getElementById('ball');
-        const wheelRadius = 250;
-        const ballRadius = 230;
+        const wheelCenter = 150;
+        const ballRadius = 120; // Reduced radius to keep ball inside wheel
         let balance = 1000;
         let betAmount = 0;
+        let spinning = false;
 
         function createWheel() {
             numbers.forEach((number, index) => {
                 const angle = (index / numbers.length) * 360;
-                const x = wheelRadius + ballRadius * Math.cos(angle * Math.PI / 180) - 25;
-                const y = wheelRadius + ballRadius * Math.sin(angle * Math.PI / 180) - 25;
+                const radius = 140; // Adjusted radius for numbers
+                const x = wheelCenter + radius * Math.cos(angle * Math.PI / 180) - 15;
+                const y = wheelCenter + radius * Math.sin(angle * Math.PI / 180) - 15;
                 const numberDiv = document.createElement('div');
                 numberDiv.className = 'number';
                 numberDiv.style.left = `${x}px`;
                 numberDiv.style.top = `${y}px`;
-                numberDiv.style.backgroundColor = colors[(index % 2) + 1];
+                numberDiv.style.backgroundColor = colors[index];
                 numberDiv.innerText = number;
                 wheel.appendChild(numberDiv);
             });
@@ -141,30 +187,71 @@
                 return;
             }
 
+            if (spinning) return;
+            spinning = true;
+
             const spinAngle = Math.floor(Math.random() * 360);
             const ballAngle = (spinAngle + Math.floor(Math.random() * 360)) % 360;
-            const x = wheelRadius + ballRadius * Math.cos(ballAngle * Math.PI / 180) - 10;
-            const y = wheelRadius + ballRadius * Math.sin(ballAngle * Math.PI / 180) - 10;
-            ball.style.left = `${x}px`;
-            ball.style.top = `${y}px`;
+            const winningNumberIndex = Math.floor(ballAngle / (360 / numbers.length));
+            const winningNumber = numbers[winningNumberIndex];
+            const winningColor = colors[winningNumberIndex];
 
-            const winningNumber = numbers[Math.floor(ballAngle / (360 / numbers.length))];
-            const winningColor = winningNumber === 0 ? "green" : (numbers.indexOf(winningNumber) % 2 === 0 ? "black" : "red");
+            let currentAngle = ballAngle;
+            let ballSpeed = 15; // Increased initial speed
+            const slowDownFactor = 0.99;
+            const spinDuration = 5000;
+            const startTime = performance.now();
 
-            document.getElementById('result').innerText = `The ball landed on ${winningNumber} (${winningColor})`;
+            function animateBall(time) {
+                const elapsed = time - startTime;
+                const progress = Math.min(elapsed / spinDuration, 1);
+                ballSpeed *= slowDownFactor;
+                currentAngle += ballSpeed;
 
-            // Calculate winnings (simplified)
-            if (winningNumber === 0) {
-                balance += betAmount * 35;
-            } else if (winningColor === "red") {
-                balance += betAmount * 2;
-            } else {
-                balance -= betAmount;
+                const angle = currentAngle % 360;
+                const x = wheelCenter + ballRadius * Math.cos(angle * Math.PI / 180);
+                const y = wheelCenter + ballRadius * Math.sin(angle * Math.PI / 180);
+                
+                ball.style.left = `${x - 7.5}px`; // Centered based on ball size (15px)
+                ball.style.top = `${y - 7.5}px`;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateBall);
+                } else {
+                    // Ensure the ball lands on the winning number smoothly
+                    const finalAngle = winningNumberIndex * (360 / numbers.length);
+                    const finalX = wheelCenter + ballRadius * Math.cos(finalAngle * Math.PI / 180);
+                    const finalY = wheelCenter + ballRadius * Math.sin(finalAngle * Math.PI / 180);
+                    ball.style.transition = 'left 0.5s ease-out, top 0.5s ease-out';
+                    ball.style.left = `${finalX - 7.5}px`;
+                    ball.style.top = `${finalY - 7.5}px`;
+
+                    setTimeout(() => {
+                        spinning = false;
+                        const resultElement = document.getElementById('result');
+                        resultElement.innerText = `The ball landed on ${winningNumber} (${winningColor})`;
+                        resultElement.style.color = winningColor; // Set the color of the result text
+
+                        if (winningNumber === 0) {
+                            balance += betAmount * 35;
+                        } else if (winningColor === "red") {
+                            balance += betAmount * 2;
+                        } else {
+                            balance -= betAmount;
+                        }
+
+                        document.getElementById('balance').innerText = `Balance: €${balance}`;
+                        betAmount = 0;
+                        document.getElementById('bet-amount').innerText = `Bet Amount: €${betAmount}`;
+                    }, 500); // Wait for the transition to complete
+                }
             }
 
-            document.getElementById('balance').innerText = `Balance: €${balance}`;
-            betAmount = 0;
-            document.getElementById('bet-amount').innerText = `Bet Amount: €${betAmount}`;
+            requestAnimationFrame(animateBall);
+        }
+
+        function goBack() {
+            window.location.href = "/games";
         }
 
         createWheel();
