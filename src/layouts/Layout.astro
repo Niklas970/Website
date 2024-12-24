@@ -8,6 +8,18 @@
 		<title>Astro Basics</title>
 	</head>
 	<body>
+		<header>
+			<nav>
+				<div class="logo">
+					<img src="/src/components/schmidhome-logo.svg" alt="Schmidhome Logo" />
+				</div>
+				<ul>
+					<li><a href="/">Home</a></li>
+					<li><a href="/about">About</a></li>
+					<li><a href="/contact">Contact</a></li>
+				</ul>
+			</nav>
+		</header>
 		<slot />
 	</body>
 </html>
@@ -18,6 +30,52 @@
 		margin: 0;
 		width: 100%;
 		height: 100%;
+		font-family: Arial, sans-serif;
+	}
+
+	header {
+		background-color: #007BFF; /* Blau */
+		color: white;
+		padding: 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	nav {
+		display: flex;
+		align-items: center;
+		width: 100%;
+	}
+
+	.logo {
+		margin-right: auto;
+	}
+
+	nav ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		justify-content: flex-end;
+		width: 100%;
+	}
+
+	nav ul li {
+		margin: 0 1rem;
+	}
+
+	nav ul li a {
+		color: white;
+		text-decoration: none;
+		font-weight: bold;
+		transition: color 0.3s;
+	}
+
+	nav ul li a:hover {
+		color: #FFD700; /* Gold */
+		text-decoration: underline;
 	}
 </style>
 <script>
